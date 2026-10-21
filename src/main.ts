@@ -1,9 +1,10 @@
 /// <reference types="@electron-forge/plugin-vite/forge-vite-env" />
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'node:path';
-import started from 'electron-squirrel-startup';
-import fs from 'node:fs';
-import type FileEntry from './interface/FileEntry';
+import { app, BrowserWindow, ipcMain } from "electron";
+import path from "node:path";
+import started from "electron-squirrel-startup";
+import fs from "node:fs";
+import type FileEntry from "./interface/FileEntry";
+import { _userFiles } from "./ipcMainAction";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -12,24 +13,25 @@ if (started) {
 
 let mainWindow: BrowserWindow | null = null;
 
-const userDataDir = 'userData';
-const userFiles = path.join(app.getPath('userData'), userDataDir);
+const userDataDir = "userData";
+const userFiles = path.join(app.getPath("userData"), userDataDir);
 
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    titleBarStyle: 'hidden',
+    titleBarStyle: "hidden",
     autoHideMenuBar: true,
+    backgroundColor: "#161616",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs'),
+      preload: path.join(__dirname, "preload.cjs"),
     },
   });
 
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
   });
 
@@ -47,9 +49,9 @@ const createWindow = () => {
   fs.mkdirSync(userFiles, { recursive: true });
 };
 
-ipcMain.on('window:minimize', () => mainWindow?.minimize());
+ipcMain.on("window:minimize", () => mainWindow?.minimize());
 
-ipcMain.on('window:maximize', () => {
+ipcMain.on("window:maximize", () => {
   if (!mainWindow) return;
   if (mainWindow.isMaximized()) {
     mainWindow.unmaximize();
@@ -58,16 +60,63 @@ ipcMain.on('window:maximize', () => {
   }
 });
 
-ipcMain.on('window:close', () => mainWindow?.close());
+ipcMain.on("window:close", () => mainWindow?.close());
 
-ipcMain.handle('userFiles:getFiles', async (): Promise<FileEntry[]> => {
-  const dirents = await fs.promises.readdir(userFiles, {
-    withFileTypes: true,
-  });
-  return dirents.map((dirent) => ({
-    name: dirent.name,
-    kind: dirent.isDirectory() ? ('folder' as const) : ('file' as const),
-  }));
+const resolveInUserFiles = (relPath: string) => {
+  const resolved = path.resolve(userFiles, relPath);
+  if (resolved !== userFiles && !resolved.startsWith(userFiles + path.sep)) {
+    throw new Error("Path escapes the vault");
+  }
+  return resolved;
+};
+
+ipcMain.handle(_userFiles.getFiles, async (): Promise<FileEntry[]> => {
+  const walk = async (
+    dir: string,
+    depth: number,
+    rel: string,
+  ): Promise<FileEntry[]> => {
+    const dirents = await fs.promises.readdir(dir, { withFileTypes: true });
+    const entries: FileEntry[] = [];
+    for (const dirent of dirents) {
+      const entryPath = rel ? `${rel}/${dirent.name}` : dirent.name;
+      entries.push({
+        name: dirent.name,
+        kind: dirent.isDirectory() ? ("folder" as const) : ("file" as const),
+        path: entryPath,
+        depth,
+      });
+      if (dirent.isDirectory()) {
+        entries.push(
+          ...(await walk(path.join(dir, dirent.name), depth + 1, entryPath)),
+        );
+      }
+    }
+    return entries;
+  };
+  return walk(userFiles, 0, "");
+});
+
+ipcMain.handle(_userFiles.createDir, async (_, dir_name: string) => {
+  if (dir_name) await fs.promises.mkdir(resolveInUserFiles(dir_name));
+});
+
+ipcMain.handle(_userFiles.createFile, async (_, file_name: string) => {
+  if (file_name)
+    await fs.promises.writeFile(resolveInUserFiles(file_name), "");
+});
+
+ipcMain.handle(_userFiles.deleteFile, async (_, file_name: string) => {
+  if (file_name)
+    await fs.promises.rm(resolveInUserFiles(file_name), { force: true });
+});
+
+ipcMain.handle(_userFiles.deleteDir, async (_, dir_name: string) => {
+  if (dir_name)
+    await fs.promises.rm(resolveInUserFiles(dir_name), {
+      recursive: true,
+      force: true,
+    });
 });
 
 // This method will be called when Electron has finished
@@ -78,7 +127,7 @@ app.whenReady().then(() => {
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
@@ -88,8 +137,8 @@ app.whenReady().then(() => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });

@@ -1,25 +1,43 @@
-import {
-  CloseIcon,
-  FileIcon,
-  MaximizeIcon,
-  MinimizeIcon,
-  MoreIcon,
-} from './icons';
+import { useTabs } from "../tabs";
+import HeaderTab from "./header-tab";
+import { CloseIcon, MaximizeIcon, MinimizeIcon, MoreIcon } from "./icons";
+import ThemeToggle from "./theme-toggle";
+
+const WELCOME_TAB = { name: "Welcome", path: "" };
 
 const Header = () => {
+  const { tabs, currentFile, closeTab, closeAllTabs, setCurrentFile } =
+    useTabs();
+
   return (
     <header className="header">
-      <div className="header__tab">
-        <span className="header__tab-icon">
-          <FileIcon size={14} />
-        </span>
-        <span className="header__tab-title">Welcome</span>
-        <button className="header__tab-close" type="button">
-          <CloseIcon size={12} />
-        </button>
+      <div className="header__tabs">
+        {tabs.length === 0 && (
+          <HeaderTab tab={WELCOME_TAB} active closable={false} />
+        )}
+        {tabs.map((tab) => (
+          <HeaderTab
+            key={tab.path}
+            tab={tab}
+            active={tab.path === currentFile}
+            onSelect={() => setCurrentFile(tab.path)}
+            onClose={() => closeTab(tab.path)}
+          />
+        ))}
+        {tabs.length > 0 && (
+          <button
+            className="icon-button header__close-all"
+            type="button"
+            title="Close all tabs"
+            onClick={closeAllTabs}
+          >
+            <CloseIcon size={12} />
+          </button>
+        )}
       </div>
 
       <div className="header__right">
+        <ThemeToggle />
         <button className="icon-button" type="button">
           <MoreIcon size={16} />
         </button>

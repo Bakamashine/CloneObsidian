@@ -1,5 +1,9 @@
+import { useTabs } from "../tabs";
+
 const MainPage = () => {
-  return <p>Hello world</p>;
+  const { currentFile } = useTabs();
+
+  return <p>{currentFile ?? "Welcome"}</p>;
 };
 
 export default MainPage;

@@ -1,4 +1,4 @@
-declare module '*.css';
+declare module "*.css";
 
 interface WindowControlsApi {
   minimize(): void;
@@ -7,7 +7,11 @@ interface WindowControlsApi {
 }
 
 interface UserFilesApi {
-  getFiles(): Promise<import('./interface/FileEntry').default[]>;
+  getFiles(): Promise<import("./interface/FileEntry").default[]>;
+  createDirectory(dir_name: string): Promise<void>;
+  createFile(file_name: string): Promise<void>;
+  deleteFile(file_name: string): Promise<void>;
+  deleteDirectory(directory_name: string): Promise<void>;
 }
 
 interface Window {

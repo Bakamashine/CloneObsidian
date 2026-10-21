@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
-} from 'react';
+} from "react";
 
 export type ContextMenuItem =
   | { label: string; danger?: boolean; onSelect?: () => void }
@@ -34,14 +34,14 @@ const ContextMenu = ({ state, onClose }: ContextMenuProps) => {
       if (!menuRef.current?.contains(event.target as Node)) onClose();
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === "Escape") onClose();
     };
 
-    window.addEventListener('mousedown', handlePointerDown);
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('mousedown', handlePointerDown);
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [state, onClose]);
 
@@ -70,7 +70,7 @@ const ContextMenu = ({ state, onClose }: ContextMenuProps) => {
       role="menu"
     >
       {state.items.map((item, index) =>
-        'separator' in item ? (
+        "separator" in item ? (
           <div
             key={index}
             className="context-menu__separator"
@@ -81,8 +81,8 @@ const ContextMenu = ({ state, onClose }: ContextMenuProps) => {
             key={index}
             className={
               item.danger
-                ? 'context-menu__item context-menu__item--danger'
-                : 'context-menu__item'
+                ? "context-menu__item context-menu__item--danger"
+                : "context-menu__item"
             }
             type="button"
             role="menuitem"
