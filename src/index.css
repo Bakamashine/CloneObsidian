@@ -234,6 +234,11 @@ svg {
   margin-left: -4px;
   color: var(--text-muted);
   transform: rotate(90deg);
+  transition: transform 0.15s ease;
+}
+
+.file-item--collapsed .file-item__chevron {
+  transform: none;
 }
 
 .file-item__icon {
