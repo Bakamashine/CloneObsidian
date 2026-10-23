@@ -44,8 +44,10 @@ const createWindow = () => {
     );
   }
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // Open the DevTools in development only.
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.webContents.openDevTools();
+  }
   fs.mkdirSync(userFiles, { recursive: true });
 };
 
@@ -77,15 +79,17 @@ ipcMain.handle(_userFiles.getFiles, async (): Promise<FileEntry[]> => {
     rel: string,
   ): Promise<FileEntry[]> => {
     const dirents = await fs.promises.readdir(dir, { withFileTypes: true });
+    const allowedExt = [".md"];
     const entries: FileEntry[] = [];
     for (const dirent of dirents) {
       const entryPath = rel ? `${rel}/${dirent.name}` : dirent.name;
-      entries.push({
-        name: dirent.name,
-        kind: dirent.isDirectory() ? ("folder" as const) : ("file" as const),
-        path: entryPath,
-        depth,
-      });
+      if (allowedExt.includes(path.extname(entryPath)) || !path.extname(entryPath))
+        entries.push({
+          name: dirent.name,
+          kind: dirent.isDirectory() ? ("folder" as const) : ("file" as const),
+          path: entryPath,
+          depth,
+        });
       if (dirent.isDirectory()) {
         entries.push(
           ...(await walk(path.join(dir, dirent.name), depth + 1, entryPath)),
@@ -102,8 +106,7 @@ ipcMain.handle(_userFiles.createDir, async (_, dir_name: string) => {
 });
 
 ipcMain.handle(_userFiles.createFile, async (_, file_name: string) => {
-  if (file_name)
-    await fs.promises.writeFile(resolveInUserFiles(file_name), "");
+  if (file_name) await fs.promises.writeFile(resolveInUserFiles(file_name), "");
 });
 
 ipcMain.handle(_userFiles.deleteFile, async (_, file_name: string) => {
@@ -116,6 +119,13 @@ ipcMain.handle(_userFiles.deleteDir, async (_, dir_name: string) => {
     await fs.promises.rm(resolveInUserFiles(dir_name), {
       recursive: true,
       force: true,
+    });
+});
+
+ipcMain.handle(_userFiles.getText, async (_, ffname: string) => {
+  if (ffname)
+    return await fs.promises.readFile(resolveInUserFiles(ffname), {
+      encoding: "utf8",
     });
 });
 

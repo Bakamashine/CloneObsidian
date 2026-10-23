@@ -12,6 +12,7 @@
   --accent: #8b6cef;
   --danger: #e81123;
   --danger-hover: #e81123;
+  --markdown-text: #ffffff;
   --shadow-menu: 0 6px 20px rgba(0, 0, 0, 0.45);
   --scrollbar-thumb: rgba(255, 255, 255, 0.1);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
@@ -35,6 +36,7 @@
   --accent: #7a5af8;
   --danger: #c62828;
   --danger-hover: #c62828;
+  --markdown-text: #000000;
   --shadow-menu: 0 6px 20px rgba(0, 0, 0, 0.15);
   --scrollbar-thumb: rgba(0, 0, 0, 0.15);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
@@ -301,6 +303,7 @@ svg {
   background: var(--bg-tab);
   font-size: 13px;
   cursor: pointer;
+  -webkit-app-region: no-drag;
   transition: background-color 0.1s ease;
 }
 
@@ -311,6 +314,7 @@ svg {
 .header__tab--active {
   background: var(--bg-primary);
   color: var(--text-active);
+  cursor: pointer;
 }
 
 .header__close-all {
@@ -525,14 +529,254 @@ svg {
 
 .editor {
   flex: 1;
-  overflow-y: auto;
-  padding: 48px 96px;
+  overflow: hidden;
   user-select: text;
   line-height: 1.6;
 }
 
-.editor p {
+.editor__loading {
   max-width: 700px;
   margin: 0 auto;
+  padding: 24px 0;
   font-size: 16px;
+  color: var(--text-muted);
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  height: 34px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
+}
+
+.editor-toolbar__view {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+}
+
+.editor-toolbar__button {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition:
+    background-color 0.1s ease,
+    color 0.1s ease;
+}
+
+.editor-toolbar__button:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.editor-toolbar__button--active {
+  background: var(--bg-primary);
+  color: var(--text-active);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.editor-pane__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Markdown viewer */
+
+.markdown-viewer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 48px 80px;
+  color: var(--markdown-text);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-wrap: break-word;
+  user-select: text;
+}
+
+.markdown-viewer > :first-child {
+  margin-top: 0;
+}
+
+.markdown-viewer > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-viewer h1,
+.markdown-viewer h2,
+.markdown-viewer h3,
+.markdown-viewer h4,
+.markdown-viewer h5,
+.markdown-viewer h6 {
+  margin: 1.4em 0 0.6em;
+  color: var(--markdown-text);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.markdown-viewer h1 {
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+  font-size: 2em;
+}
+
+.markdown-viewer h2 {
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.6em;
+}
+
+.markdown-viewer h3 {
+  font-size: 1.35em;
+}
+
+.markdown-viewer h4 {
+  font-size: 1.15em;
+}
+
+.markdown-viewer h5 {
+  font-size: 1em;
+}
+
+.markdown-viewer h6 {
+  font-size: 0.9em;
+  color: var(--markdown-text);
+}
+
+.markdown-viewer p {
+  margin: 0 0 1em;
+  font-size: 16px;
+}
+
+.markdown-viewer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.markdown-viewer a:hover {
+  text-decoration: underline;
+}
+
+.markdown-viewer strong {
+  color: var(--markdown-text);
+  font-weight: 600;
+}
+
+.markdown-viewer ul,
+.markdown-viewer ol {
+  margin: 0 0 1em;
+  padding-left: 1.6em;
+}
+
+.markdown-viewer li {
+  margin: 0.25em 0;
+}
+
+.markdown-viewer li > ul,
+.markdown-viewer li > ol {
+  margin-bottom: 0;
+}
+
+.markdown-viewer .contains-task-list {
+  padding-left: 0.4em;
+  list-style: none;
+}
+
+.markdown-viewer .task-list-item {
+  list-style: none;
+}
+
+.markdown-viewer input[type='checkbox'] {
+  margin-right: 6px;
+  accent-color: var(--accent);
+}
+
+.markdown-viewer blockquote {
+  margin: 0 0 1em;
+  padding: 2px 16px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+.markdown-viewer blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-viewer code {
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  font-size: 0.88em;
+}
+
+.markdown-viewer pre {
+  margin: 0 0 1em;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  line-height: 1.5;
+}
+
+.markdown-viewer pre code {
+  padding: 0;
+  background: none;
+  font-size: 0.85em;
+}
+
+.markdown-viewer table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.markdown-viewer th,
+.markdown-viewer td {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.markdown-viewer th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+}
+
+.markdown-viewer tr:nth-child(even) td {
+  background: var(--bg-hover);
+}
+
+.markdown-viewer hr {
+  height: 1px;
+  margin: 28px 0;
+  border: none;
+  background: var(--border);
+}
+
+.markdown-viewer img {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.markdown-viewer del {
+  color: var(--text-muted);
 }

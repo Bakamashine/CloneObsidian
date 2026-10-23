@@ -16,5 +16,6 @@ contextBridge.exposeInMainWorld("userFiles", {
   deleteDirectory: (dir_name: string) =>
     ipcRenderer.invoke(_userFiles.deleteDir, dir_name),
   deleteFile: (file_name: string) =>
-    ipcRenderer.invoke(_userFiles.deleteFile, file_name)
+    ipcRenderer.invoke(_userFiles.deleteFile, file_name),
+  getText: (ffname: string) => ipcRenderer.invoke(_userFiles.getText, ffname),
 });

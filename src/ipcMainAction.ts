@@ -5,4 +5,5 @@ export const _userFiles = {
   createFile: "userFiles:createFile",
   deleteFile: "userFiles:deleteFile",
   deleteDir: "userFiles:deleteDirectory",
+  getText: "userFiles:getText"
 };
