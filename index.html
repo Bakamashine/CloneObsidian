@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Obsidian Clone</title>
+    <script>
+      // Applies the stored theme before first paint. Keep the storage key in
+      // sync with THEME_STORAGE_KEY in src/theme.tsx.
+      (() => {
+        const stored = localStorage.getItem('cloneobsidianvite:theme');
+        document.documentElement.dataset.theme =
+          stored === 'light' ? 'light' : 'dark';
+      })();
+    </script>
+  </head>
+  <body>
+    <script type="module" src="/src/renderer.ts"></script>
+  </body>
+</html>
