@@ -9,6 +9,10 @@ interface _EditorProps {
   fpfile: string;
 }
 
+const EDITOR_OPTIONS = {
+  fontFamily: "'Roboto', 'Segoe UI', sans-serif",
+};
+
 const _Editor = ({ fpfile }: _EditorProps) => {
   const { theme } = useTheme();
   const { viewMode, setViewMode } = useTabs();
@@ -140,6 +144,7 @@ const _Editor = ({ fpfile }: _EditorProps) => {
           <Editor
             theme={theme === "dark" ? "vs-dark" : "vs"}
             defaultLanguage="markdown"
+            options={EDITOR_OPTIONS}
             value={text}
             onChange={(value) => setText(value ?? "")}
             height="100%"

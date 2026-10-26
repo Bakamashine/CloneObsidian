@@ -1,3 +1,22 @@
+/* Roboto is licensed under the SIL Open Font License; see OFL.txt. */
+@font-face {
+  font-family: 'Roboto';
+  src: url('./assets/fonts/Roboto-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('./assets/fonts/Roboto-Variable-Italic.ttf') format('truetype');
+  font-weight: 100 900;
+  font-stretch: 75% 100%;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --bg-primary: #1e1e1e;
   --bg-secondary: #161616;
@@ -13,9 +32,22 @@
   --danger: #e81123;
   --danger-hover: #e81123;
   --markdown-text: #ffffff;
+  --font-ui:
+    'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Ubuntu, Cantarell,
+    'Helvetica Neue', sans-serif;
   --shadow-menu: 0 6px 20px rgba(0, 0, 0, 0.45);
   --scrollbar-thumb: rgba(255, 255, 255, 0.1);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+  --toolbar-button-bg: rgba(255, 255, 255, 0.05);
+  --toolbar-button-bg-hover: rgba(255, 255, 255, 0.1);
+  --toolbar-button-border: rgba(255, 255, 255, 0.09);
+  --toolbar-button-border-hover: rgba(255, 255, 255, 0.16);
+  --toolbar-button-text: #c8c9cb;
+  --toolbar-button-text-hover: #ffffff;
+  --toolbar-save-dirty-bg: rgba(139, 108, 239, 0.2);
+  --toolbar-save-dirty-bg-hover: rgba(139, 108, 239, 0.3);
+  --toolbar-save-dirty-border: rgba(139, 108, 239, 0.5);
+  --toolbar-save-dirty-text: #c9b8ff;
   --ribbon-width: 40px;
   --sidebar-width: 260px;
   --header-height: 40px;
@@ -40,6 +72,16 @@
   --shadow-menu: 0 6px 20px rgba(0, 0, 0, 0.15);
   --scrollbar-thumb: rgba(0, 0, 0, 0.15);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
+  --toolbar-button-bg: rgba(0, 0, 0, 0.03);
+  --toolbar-button-bg-hover: rgba(0, 0, 0, 0.07);
+  --toolbar-button-border: rgba(0, 0, 0, 0.12);
+  --toolbar-button-border-hover: rgba(0, 0, 0, 0.2);
+  --toolbar-button-text: #4a4a4a;
+  --toolbar-button-text-hover: #161616;
+  --toolbar-save-dirty-bg: rgba(122, 90, 248, 0.12);
+  --toolbar-save-dirty-bg-hover: rgba(122, 90, 248, 0.2);
+  --toolbar-save-dirty-border: rgba(122, 90, 248, 0.45);
+  --toolbar-save-dirty-text: #5b21b6;
   color-scheme: light;
 }
 
@@ -55,9 +97,7 @@ body {
   overflow: hidden;
   background: var(--bg-secondary);
   color: var(--text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, Cantarell,
-    'Helvetica Neue', sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   user-select: none;
 }
@@ -599,11 +639,31 @@ svg {
   display: flex;
   align-items: center;
   gap: 6px;
+  border: 1px solid var(--toolbar-button-border);
+  background: var(--toolbar-button-bg);
+  color: var(--toolbar-button-text);
+  transition:
+    background-color 0.1s ease,
+    border-color 0.1s ease,
+    color 0.1s ease;
+}
+
+.editor-toolbar__save:hover,
+.editor-toolbar__restore:hover {
+  border-color: var(--toolbar-button-border-hover);
+  background: var(--toolbar-button-bg-hover);
+  color: var(--toolbar-button-text-hover);
 }
 
 .editor-toolbar__save--dirty,
 .editor-toolbar__save--dirty:hover {
-  color: var(--accent);
+  border-color: var(--toolbar-save-dirty-border);
+  background: var(--toolbar-save-dirty-bg);
+  color: var(--toolbar-save-dirty-text);
+}
+
+.editor-toolbar__save--dirty:hover {
+  background: var(--toolbar-save-dirty-bg-hover);
 }
 
 .editor-toolbar__save:disabled,
@@ -614,8 +674,9 @@ svg {
 
 .editor-toolbar__save:disabled:hover,
 .editor-toolbar__restore:disabled:hover {
-  background: none;
-  color: var(--text-muted);
+  border-color: var(--toolbar-button-border);
+  background: var(--toolbar-button-bg);
+  color: var(--toolbar-button-text);
 }
 
 .editor-pane__body {
