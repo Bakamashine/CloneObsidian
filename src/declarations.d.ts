@@ -17,7 +17,14 @@ interface UserFilesApi {
   search(query: string): Promise<import("./interface/SearchResult").default>;
 }
 
+interface GithubSyncApi {
+  push(): Promise<void>;
+  pull(): void;
+  clone(): void;
+}
+
 interface Window {
   windowControls: WindowControlsApi;
   userFiles: UserFilesApi;
+  sync: GithubSyncApi;
 }

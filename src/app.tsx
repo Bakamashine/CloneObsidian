@@ -1,9 +1,9 @@
-import { HashRouter, Route, Routes } from 'react-router-dom';
-import MainPage from './pages';
-import SearchPage from './pages/search';
-import Layout from './layout';
-import TabsProvider from './tabs';
-import { ThemeProvider } from './theme';
+import { HashRouter, Route, Routes } from "react-router-dom";
+import MainPage from "./pages";
+import SearchPage from "./pages/search";
+import Layout from "./layout";
+import TabsProvider from "./tabs";
+import { ThemeProvider } from "./theme";
 
 const App = () => {
   return (

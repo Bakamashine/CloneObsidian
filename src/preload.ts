@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { _userFiles } from "./ipcMainAction";
+import { _Sync, _userFiles } from "./ipcMainAction";
 
 contextBridge.exposeInMainWorld("windowControls", {
   minimize: () => ipcRenderer.send("window:minimize"),
@@ -21,4 +21,10 @@ contextBridge.exposeInMainWorld("userFiles", {
   saveText: (ffname: string, text: string) =>
     ipcRenderer.invoke(_userFiles.saveText, ffname, text),
   search: (query: string) => ipcRenderer.invoke(_userFiles.search, query),
+});
+
+contextBridge.exposeInMainWorld("sync", {
+  push: () => ipcRenderer.invoke(_Sync.push),
+  pull: () => ipcRenderer.invoke(_Sync.pull),
+  clone: () => ipcRenderer.invoke(_Sync.clone),
 });

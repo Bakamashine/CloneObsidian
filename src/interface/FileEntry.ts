@@ -1,6 +1,6 @@
 type FileEntry = {
   name: string;
-  kind: 'file' | 'folder';
+  kind: "file" | "folder";
   path: string;
   depth?: number;
 };
