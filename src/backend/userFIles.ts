@@ -1,7 +1,7 @@
-import fs from "node:original-fs";
+import fs from "node:fs";
 import FileEntry from "../interface/FileEntry";
 import path from "node:path";
-import { userFiles } from "../ipcMainHandlers";
+import { userFiles } from "./paths";
 import SearchResult, { SearchMatch } from "../interface/SearchResult";
 const MAX_SEARCH_MATCHES = 200;
 const SEARCH_SNIPPET_LENGTH = 200;
@@ -28,7 +28,8 @@ export function __UserFilesFunc() {
         if (
           allowedExt.includes(path.extname(entryPath)) ||
           !path.extname(entryPath)
-        )
+        ) {
+          if (dirent.name[0] == ".") continue;
           entries.push({
             name: dirent.name,
             kind: dirent.isDirectory()
@@ -37,6 +38,8 @@ export function __UserFilesFunc() {
             path: entryPath,
             depth,
           });
+        }
+
         if (dirent.isDirectory()) {
           entries.push(
             ...(await walk(path.join(dir, dirent.name), depth + 1, entryPath)),

@@ -1,5 +1,3 @@
-import { resolveSoa } from "dns";
-
 interface TimeResponse {
   timezone: string;
   formatted: string;

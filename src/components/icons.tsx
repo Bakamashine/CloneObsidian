@@ -130,3 +130,24 @@ export const SunIcon = createIcon(
 export const MoonIcon = createIcon(
   <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />,
 );
+
+export const PushIcon = createIcon(
+  <>
+    <path d="M12 19V5" />
+    <polyline points="5 12 12 5 19 12" />
+  </>,
+);
+
+export const PullIcon = createIcon(
+  <>
+    <path d="M12 5v14" />
+    <polyline points="19 12 12 19 5 12" />
+  </>,
+);
+
+export const CloneIcon = createIcon(
+  <>
+    <rect x="9" y="9" width="13" height="13" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </>,
+);

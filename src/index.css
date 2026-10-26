@@ -29,6 +29,7 @@
   --text-muted: #8a8a8a;
   --text-active: #ffffff;
   --accent: #8b6cef;
+  --success: #4caf50;
   --danger: #e81123;
   --danger-hover: #e81123;
   --markdown-text: #ffffff;
@@ -66,6 +67,7 @@
   --text-muted: #6b6b6b;
   --text-active: #4c1d95;
   --accent: #7a5af8;
+  --success: #2e7d32;
   --danger: #c62828;
   --danger-hover: #c62828;
   --markdown-text: #000000;
@@ -991,8 +993,9 @@ svg {
   padding: 0.15em 0.35em;
   border-radius: 4px;
   background: var(--bg-secondary);
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+    monospace;
   font-size: 0.88em;
 }
 
@@ -1049,4 +1052,62 @@ svg {
 
 .markdown-viewer del {
   color: var(--text-muted);
+}
+
+.notices {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.notice {
+  max-width: 320px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--bg-header);
+  box-shadow: var(--shadow-menu);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: notice-in 140ms ease-out;
+}
+
+.notice:hover {
+  background: var(--bg-primary);
+}
+
+.notice--success {
+  border-left-color: var(--success);
+}
+
+.notice--error {
+  border-left-color: var(--danger);
+}
+
+.notice--info {
+  border-left-color: var(--text-muted);
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

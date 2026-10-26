@@ -1,16 +1,12 @@
-import { app, ipcMain, type BrowserWindow } from "electron";
+import { ipcMain, type BrowserWindow } from "electron";
 import fs from "node:fs";
-import path from "node:path";
-import type FileEntry from "./interface/FileEntry";
-import type SearchResult from "./interface/SearchResult";
-import type { SearchMatch } from "./interface/SearchResult";
 import { _Sync, _userFiles, _windowM } from "./ipcMainAction";
 import github_sync from "./sync/github_sync";
 import { _Window } from "./backend/window";
 import { __UserFilesFunc } from "./backend/userFIles";
+import { userFiles } from "./backend/paths";
 
-const userDataDir = "userData";
-export const userFiles = path.join(app.getPath("userData"), userDataDir);
+export { userFiles };
 
 const ensureUserFilesDir = () => {
   fs.mkdirSync(userFiles, { recursive: true });
@@ -36,7 +32,7 @@ export const registerIpcHandlers = (
   ipcMain.handle(_userFiles.saveText, uf_func.saveText);
   ipcMain.handle(_userFiles.search, uf_func.search);
 
-  ipcMain.handle(_Sync.push, github_sync.push);
-  ipcMain.handle(_Sync.clone, github_sync.clone);
-  ipcMain.handle(_Sync.pull, github_sync.pull);
+  ipcMain.handle(_Sync.push, github_sync.push.bind(github_sync));
+  ipcMain.handle(_Sync.clone, github_sync.clone.bind(github_sync));
+  ipcMain.handle(_Sync.pull, github_sync.pull.bind(github_sync));
 };
