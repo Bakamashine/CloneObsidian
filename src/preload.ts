@@ -20,4 +20,5 @@ contextBridge.exposeInMainWorld("userFiles", {
   getText: (ffname: string) => ipcRenderer.invoke(_userFiles.getText, ffname),
   saveText: (ffname: string, text: string) =>
     ipcRenderer.invoke(_userFiles.saveText, ffname, text),
+  search: (query: string) => ipcRenderer.invoke(_userFiles.search, query),
 });

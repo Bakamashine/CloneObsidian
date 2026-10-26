@@ -7,4 +7,5 @@ export const _userFiles = {
   deleteDir: "userFiles:deleteDirectory",
   getText: "userFiles:getText",
   saveText: "userFiles:saveText",
+  search: "userFiles:search",
 };

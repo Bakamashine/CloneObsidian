@@ -1,6 +1,7 @@
+import { useNavigate } from "react-router-dom";
 import { useTabs } from "../tabs";
 import HeaderTab from "./header-tab";
-import { CloseIcon, MaximizeIcon, MinimizeIcon, MoreIcon } from "./icons";
+import { CloseIcon, MaximizeIcon, MinimizeIcon } from "./icons";
 import ThemeToggle from "./theme-toggle";
 
 const WELCOME_TAB = { name: "Welcome", path: "" };
@@ -8,6 +9,12 @@ const WELCOME_TAB = { name: "Welcome", path: "" };
 const Header = () => {
   const { tabs, currentFile, closeTab, closeAllTabs, setCurrentFile } =
     useTabs();
+  const navigate = useNavigate();
+
+  const selectTab = (path: string) => {
+    setCurrentFile(path);
+    navigate("/");
+  };
 
   return (
     <header className="header">
@@ -20,7 +27,7 @@ const Header = () => {
             key={tab.path}
             tab={tab}
             active={tab.path === currentFile}
-            onSelect={() => setCurrentFile(tab.path)}
+            onSelect={() => selectTab(tab.path)}
             onClose={() => closeTab(tab.path)}
           />
         ))}
@@ -38,9 +45,9 @@ const Header = () => {
 
       <div className="header__right">
         <ThemeToggle />
-        <button className="icon-button" type="button">
+        {/* <button className="icon-button" type="button">
           <MoreIcon size={16} />
-        </button>
+        </button> */}
         <div className="window-controls">
           <button
             className="window-control"

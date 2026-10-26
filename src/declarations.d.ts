@@ -14,6 +14,7 @@ interface UserFilesApi {
   deleteDirectory(directory_name: string): Promise<void>;
   getText(fpfile: string): Promise<string>;
   saveText(fpfile: string, text: string): Promise<void>;
+  search(query: string): Promise<import("./interface/SearchResult").default>;
 }
 
 interface Window {

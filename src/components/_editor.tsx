@@ -1,4 +1,4 @@
-import { Editor } from "@monaco-editor/react";
+import { Editor, type OnMount } from "@monaco-editor/react";
 import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "../theme";
 import { useTabs } from "../tabs";
@@ -7,13 +7,14 @@ import Markdown from "./markdown";
 
 interface _EditorProps {
   fpfile: string;
+  initialLine?: number;
 }
 
 const EDITOR_OPTIONS = {
   fontFamily: "'Roboto', 'Segoe UI', sans-serif",
 };
 
-const _Editor = ({ fpfile }: _EditorProps) => {
+const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
   const { theme } = useTheme();
   const { viewMode, setViewMode } = useTabs();
   const [text, setText] = useState("");
@@ -36,6 +37,16 @@ const _Editor = ({ fpfile }: _EditorProps) => {
   const restore = useCallback(() => {
     setText(savedText);
   }, [savedText]);
+
+  const handleEditorMount = useCallback<OnMount>(
+    (editor) => {
+      if (!initialLine) return;
+      editor.setPosition({ lineNumber: initialLine, column: 1 });
+      editor.revealLineInCenter(initialLine);
+      editor.focus();
+    },
+    [initialLine],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -147,6 +158,7 @@ const _Editor = ({ fpfile }: _EditorProps) => {
             options={EDITOR_OPTIONS}
             value={text}
             onChange={(value) => setText(value ?? "")}
+            onMount={handleEditorMount}
             height="100%"
           />
         )}

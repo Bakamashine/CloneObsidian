@@ -4,6 +4,8 @@ import path from "node:path";
 import started from "electron-squirrel-startup";
 import fs from "node:fs";
 import type FileEntry from "./interface/FileEntry";
+import type SearchResult from "./interface/SearchResult";
+import type { SearchMatch } from "./interface/SearchResult";
 import { _userFiles } from "./ipcMainAction";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -135,6 +137,76 @@ ipcMain.handle(_userFiles.saveText, async (_, ffname: string, text: string) => {
       encoding: "utf8",
     });
 });
+
+const MAX_SEARCH_MATCHES = 200;
+const SEARCH_SNIPPET_LENGTH = 200;
+
+ipcMain.handle(
+  _userFiles.search,
+  async (_, query: string): Promise<SearchResult> => {
+    const term = query.trim().toLowerCase();
+    if (!term) return { matches: [], truncated: false };
+
+    const matches: SearchMatch[] = [];
+    let truncated = false;
+
+    const walk = async (dir: string, rel: string): Promise<boolean> => {
+      const dirents = await fs.promises.readdir(dir, { withFileTypes: true });
+      dirents.sort((a, b) => a.name.localeCompare(b.name));
+
+      for (const dirent of dirents) {
+        const entryPath = rel ? `${rel}/${dirent.name}` : dirent.name;
+
+        if (dirent.isDirectory()) {
+          if (await walk(path.join(dir, dirent.name), entryPath)) return true;
+          continue;
+        }
+
+        if (path.extname(dirent.name).toLowerCase() !== ".md") continue;
+
+        let content: string;
+        try {
+          content = await fs.promises.readFile(
+            path.join(dir, dirent.name),
+            "utf8",
+          );
+        } catch {
+          continue;
+        }
+
+        const lines = content.split(/\r?\n/);
+        for (let index = 0; index < lines.length; index++) {
+          const line = lines[index];
+          const column = line.toLowerCase().indexOf(term);
+          if (column === -1) continue;
+
+          if (matches.length >= MAX_SEARCH_MATCHES) {
+            truncated = true;
+            return true;
+          }
+
+          const start = Math.max(0, column - 60);
+          const end = Math.min(line.length, start + SEARCH_SNIPPET_LENGTH);
+          let snippet = line.slice(start, end).trim();
+          if (start > 0) snippet = `…${snippet}`;
+          if (end < line.length) snippet = `${snippet}…`;
+
+          matches.push({
+            path: entryPath,
+            name: dirent.name,
+            line: index + 1,
+            text: snippet,
+          });
+        }
+      }
+
+      return false;
+    };
+
+    await walk(userFiles, "");
+    return { matches, truncated };
+  },
+);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

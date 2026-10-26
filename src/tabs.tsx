@@ -10,6 +10,7 @@ import {
 export type Tab = {
   name: string;
   path: string;
+  line?: number;
 };
 
 export type ViewMode = "edit" | "preview";
@@ -39,13 +40,23 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const openTab = useCallback((tab: Tab) => {
-    setState((prev) => ({
-      ...prev,
-      tabs: prev.tabs.some((t) => t.path === tab.path)
-        ? prev.tabs
-        : [...prev.tabs, tab],
-      currentFile: tab.path,
-    }));
+    setState((prev) => {
+      const existing = prev.tabs.some((t) => t.path === tab.path);
+      let tabs: Tab[];
+
+      if (existing) {
+        tabs = prev.tabs.map((t) => {
+          if (t.path === tab.path) {
+            return { ...t, name: tab.name, line: tab.line };
+          }
+          return t;
+        });
+      } else {
+        tabs = [...prev.tabs, tab];
+      }
+
+      return { ...prev, tabs, currentFile: tab.path };
+    });
   }, []);
 
   const closeTab = useCallback((path: string) => {
@@ -53,10 +64,14 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
       const index = prev.tabs.findIndex((t) => t.path === path);
       if (index === -1) return prev;
       const tabs = prev.tabs.filter((t) => t.path !== path);
-      const currentFile =
-        prev.currentFile === path
-          ? (tabs[Math.min(index, tabs.length - 1)]?.path ?? null)
-          : prev.currentFile;
+      let currentFile: string | null;
+
+      if (prev.currentFile === path) {
+        currentFile = tabs[Math.min(index, tabs.length - 1)]?.path ?? null;
+      } else {
+        currentFile = prev.currentFile;
+      }
+
       return { ...prev, tabs, currentFile };
     });
   }, []);
@@ -74,10 +89,17 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const toggleViewMode = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      viewMode: prev.viewMode === "edit" ? "preview" : "edit",
-    }));
+    setState((prev) => {
+      let viewMode: ViewMode;
+
+      if (prev.viewMode === "edit") {
+        viewMode = "preview";
+      } else {
+        viewMode = "edit";
+      }
+
+      return { ...prev, viewMode };
+    });
   }, []);
 
   const value = useMemo(

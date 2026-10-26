@@ -1,4 +1,5 @@
 import { useCallback, useState, type MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import FileEntry from "../interface/FileEntry";
 import { useTabs } from "../tabs";
 import ContextMenu, {
@@ -14,6 +15,7 @@ const Sidebar = () => {
   const { entries, createItem, deleteItem } = useFileEntries();
   const { openTab, currentFile } = useTabs();
   const { menu, openAt, close } = useContextMenu();
+  const navigate = useNavigate();
   const [createModal, setCreateModal] = useState<CreateItemModalState | null>(
     null,
   );
@@ -30,6 +32,7 @@ const Sidebar = () => {
   const selectEntry = (entry: FileEntry) => {
     if (entry.kind === "file") {
       openTab({ name: entry.name, path: entry.path });
+      navigate("/");
     }
   };
 
