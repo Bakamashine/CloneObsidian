@@ -129,6 +129,13 @@ ipcMain.handle(_userFiles.getText, async (_, ffname: string) => {
     });
 });
 
+ipcMain.handle(_userFiles.saveText, async (_, ffname: string, text: string) => {
+  if (ffname)
+    await fs.promises.writeFile(resolveInUserFiles(ffname), text, {
+      encoding: "utf8",
+    });
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

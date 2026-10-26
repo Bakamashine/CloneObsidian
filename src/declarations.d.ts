@@ -13,6 +13,7 @@ interface UserFilesApi {
   deleteFile(file_name: string): Promise<void>;
   deleteDirectory(directory_name: string): Promise<void>;
   getText(fpfile: string): Promise<string>;
+  saveText(fpfile: string, text: string): Promise<void>;
 }
 
 interface Window {

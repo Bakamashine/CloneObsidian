@@ -18,4 +18,6 @@ contextBridge.exposeInMainWorld("userFiles", {
   deleteFile: (file_name: string) =>
     ipcRenderer.invoke(_userFiles.deleteFile, file_name),
   getText: (ffname: string) => ipcRenderer.invoke(_userFiles.getText, ffname),
+  saveText: (ffname: string, text: string) =>
+    ipcRenderer.invoke(_userFiles.saveText, ffname, text),
 });
