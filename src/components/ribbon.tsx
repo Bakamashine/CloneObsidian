@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BookIcon,
   CloneIcon,
@@ -6,13 +6,13 @@ import {
   PushIcon,
   SearchIcon,
   TagIcon,
-} from './icons';
-import ThemeToggle from './theme-toggle';
-import { useNotices } from '../notices';
+} from "./icons";
+import ThemeToggle from "./theme-toggle";
+import { useNotices } from "../notices";
 
 const formatError = (error: unknown, fallback: string) => {
   if (error instanceof Error && error.message.trim()) {
-    return `${fallback} ${error.message.split('\n')[0]}`;
+    return `${fallback} ${error.message.split("\n")[0]}`;
   }
   return fallback;
 };
@@ -24,47 +24,59 @@ const Ribbon = () => {
 
   const runSync = async (action: () => Promise<string>, fallback: string) => {
     try {
-      notify(await action(), 'success');
+      notify(await action(), "success");
     } catch (error) {
-      notify(formatError(error, fallback), 'error');
+      notify(formatError(error, fallback), "error");
     }
+  };
+
+  const openTerminal = () => {
+    window.terminal.open();
   };
 
   return (
     <nav className="ribbon">
       <button
         className={
-          pathname === '/'
-            ? 'ribbon__button ribbon__button--active'
-            : 'ribbon__button'
+          pathname === "/"
+            ? "ribbon__button ribbon__button--active"
+            : "ribbon__button"
         }
         type="button"
         title="Files"
-        onClick={() => navigate('/')}
+        onClick={() => navigate("/")}
       >
         <BookIcon />
       </button>
       <button
         className={
-          pathname === '/search'
-            ? 'ribbon__button ribbon__button--active'
-            : 'ribbon__button'
+          pathname === "/search"
+            ? "ribbon__button ribbon__button--active"
+            : "ribbon__button"
         }
         type="button"
         title="Search notes (Ctrl+Shift+F)"
-        onClick={() => navigate('/search')}
+        onClick={() => navigate("/search")}
       >
         <SearchIcon />
       </button>
-      <button className="ribbon__button" type="button" title="Tags">
+      {/* <button className="ribbon__button" type="button" title="Tags">
         <TagIcon />
+      </button> */}
+      <button
+        className="ribbon__button"
+        type="button"
+        title="Terminal"
+        onClick={() => openTerminal()}
+      >
+        T
       </button>
       <div className="ribbon__spacer" />
       <button
         className="ribbon__button"
         type="button"
         title="Push"
-        onClick={() => runSync(window.sync.push, 'Push failed.')}
+        onClick={() => runSync(window.sync.push, "Push failed.")}
       >
         <PushIcon />
       </button>
@@ -72,7 +84,7 @@ const Ribbon = () => {
         className="ribbon__button"
         type="button"
         title="Pull"
-        onClick={() => runSync(window.sync.pull, 'Pull failed.')}
+        onClick={() => runSync(window.sync.pull, "Pull failed.")}
       >
         <PullIcon />
       </button>
@@ -80,11 +92,11 @@ const Ribbon = () => {
         className="ribbon__button"
         type="button"
         title="Clone"
-        onClick={() => runSync(window.sync.clone, 'Clone failed.')}
+        onClick={() => runSync(window.sync.clone, "Clone failed.")}
       >
         <CloneIcon />
       </button>
-      <ThemeToggle className="ribbon__button" />
+      {/* <ThemeToggle className="ribbon__button" /> */}
     </nav>
   );
 };

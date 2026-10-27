@@ -1,10 +1,11 @@
 import { ipcMain, type BrowserWindow } from "electron";
 import fs from "node:fs";
-import { _Sync, _userFiles, _windowM } from "./ipcMainAction";
+import { _Sync, _terminal, _userFiles, _windowM } from "./ipcMainAction";
 import github_sync from "./sync/github_sync";
 import { _Window } from "./backend/window";
 import { __UserFilesFunc } from "./backend/userFIles";
 import { userFiles } from "./backend/paths";
+import _TerminalFunc from "./backend/terminal";
 
 export { userFiles };
 
@@ -18,10 +19,12 @@ export const registerIpcHandlers = (
   ensureUserFilesDir();
   const w_func = _Window(getMainWindow);
   const uf_func = __UserFilesFunc();
+  const t_func = _TerminalFunc();
 
   ipcMain.on(_windowM.minimize, w_func.minimize);
   ipcMain.on(_windowM.maximize, w_func.maximize);
   ipcMain.on(_windowM.close, w_func.close);
+  ipcMain.handle(_terminal.open, t_func.open);
 
   ipcMain.handle(_userFiles.getFiles, uf_func.getFiles);
   ipcMain.handle(_userFiles.createDir, uf_func.createDir);

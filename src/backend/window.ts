@@ -17,9 +17,12 @@ export function _Window(getMainWindow: () => BrowserWindow | null) {
   const close = () => {
     getMainWindow()?.close();
   }
+
+
   return {
     minimize,
     maximize,
-    close
+    close, 
+
   };
 }

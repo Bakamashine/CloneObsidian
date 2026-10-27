@@ -20,3 +20,7 @@ export const _windowM = {
   maximize: "window:maximize",
   close: "window:close",
 };
+
+export const _terminal = {
+  open: "terminal:open",
+};

@@ -23,8 +23,13 @@ interface GithubSyncApi {
   clone(): Promise<string>;
 }
 
+interface TerminalApi {
+  open(): void;
+}
+
 interface Window {
   windowControls: WindowControlsApi;
   userFiles: UserFilesApi;
   sync: GithubSyncApi;
+  terminal: TerminalApi
 }

@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { _Sync, _userFiles } from "./ipcMainAction";
+import { _Sync, _terminal, _userFiles } from "./ipcMainAction";
+import _TerminalFunc from "./backend/terminal";
 
 contextBridge.exposeInMainWorld("windowControls", {
   minimize: () => ipcRenderer.send("window:minimize"),
@@ -28,3 +29,8 @@ contextBridge.exposeInMainWorld("sync", {
   pull: () => ipcRenderer.invoke(_Sync.pull),
   clone: () => ipcRenderer.invoke(_Sync.clone),
 });
+
+
+contextBridge.exposeInMainWorld("terminal", {
+  open: () => ipcRenderer.invoke(_terminal.open)
+})
