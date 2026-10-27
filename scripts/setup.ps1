@@ -1,0 +1,1 @@
+New-Item $env:APPDATA/cloneobsidianvite/userData
