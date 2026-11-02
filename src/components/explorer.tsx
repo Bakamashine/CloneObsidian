@@ -66,6 +66,7 @@ type ExplorerProps = {
   currentFile: string | null;
   selectedPaths: Set<string>;
   cutPaths?: Set<string>;
+  dirtyPaths?: Set<string>;
   onSelectionChange: (paths: Set<string>) => void;
   onOpenEntry: (entry: FileEntry) => void;
   onMoveEntries: (sourcePaths: string[], targetDir: string) => void;
@@ -79,6 +80,7 @@ const Explorer = ({
   currentFile,
   selectedPaths,
   cutPaths = EMPTY_SET,
+  dirtyPaths = EMPTY_SET,
   onSelectionChange,
   onOpenEntry,
   onMoveEntries,
@@ -191,6 +193,7 @@ const Explorer = ({
               const entry = item.data;
               const isCut = cutPaths.has(entry.path);
               const isCurrent = entry.path === currentFile;
+              const isDirty = dirtyPaths.has(entry.path);
 
               return (
                 <span
@@ -218,6 +221,9 @@ const Explorer = ({
                     )}
                   </span>
                   <span className="explorer-entry__name">{title}</span>
+                  {isDirty && (
+                    <span className="explorer-entry__dirty">*</span>
+                  )}
                 </span>
               );
             }}

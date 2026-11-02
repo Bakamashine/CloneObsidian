@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useDirtyEditorPaths } from "../hooks/use-editor-buffers";
 import { useTabs } from "../tabs";
 import HeaderTab from "./header-tab";
 import { CloseIcon, MaximizeIcon, MinimizeIcon } from "./icons";
@@ -9,6 +10,7 @@ const WELCOME_TAB = { name: "Welcome", path: "" };
 const Header = () => {
   const { tabs, currentFile, closeTab, closeAllTabs, setCurrentFile } =
     useTabs();
+  const dirtyPaths = useDirtyEditorPaths();
   const navigate = useNavigate();
 
   const selectTab = (path: string) => {
@@ -27,6 +29,7 @@ const Header = () => {
             key={tab.path}
             tab={tab}
             active={tab.path === currentFile}
+            dirty={dirtyPaths.has(tab.path)}
             onSelect={() => selectTab(tab.path)}
             onClose={() => closeTab(tab.path)}
           />

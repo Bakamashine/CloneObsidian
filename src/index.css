@@ -33,6 +33,7 @@
   --accent: #ffffff;
   --accent-hover: #d4d4d4;
   --accent-contrast: #000000;
+  --tab-active-line: #007acc;
   --success: #4caf50;
   --danger: #e81123;
   --danger-hover: #e81123;
@@ -75,6 +76,7 @@
   --accent: #000000;
   --accent-hover: #1f1f1f;
   --accent-contrast: #ffffff;
+  --tab-active-line: #005fb8;
   --success: #2e7d32;
   --danger: #c62828;
   --danger-hover: #c62828;
@@ -446,6 +448,12 @@ body.is-resizing {
   text-overflow: ellipsis;
 }
 
+.explorer-entry__dirty {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 .explorer-entry--cut {
   opacity: 0.45;
 }
@@ -468,10 +476,10 @@ body.is-resizing {
 
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: space-between;
   min-height: var(--header-height);
-  padding: 6px;
+  padding: 0 6px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-header);
   -webkit-app-region: drag;
@@ -484,21 +492,19 @@ body.is-resizing {
 
 .header__tabs {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: stretch;
   min-width: 0;
   flex-wrap: wrap;
 }
 
 .header__tab {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  height: 28px;
   padding: 0 8px 0 10px;
-  border-radius: 6px;
-  background: var(--bg-tab);
+  border-radius: 0;
   font-size: 13px;
   cursor: pointer;
   -webkit-app-region: no-drag;
@@ -511,8 +517,14 @@ body.is-resizing {
 
 .header__tab--active {
   background: var(--bg-primary);
+  box-shadow: inset 0 2px 0 var(--tab-active-line);
   color: var(--text-active);
   cursor: pointer;
+}
+
+.header__tab-dirty {
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
 .header__close-all {
@@ -793,6 +805,7 @@ body.is-resizing {
 }
 
 .editor-toolbar__save,
+.editor-toolbar__save-all,
 .editor-toolbar__restore {
   display: flex;
   align-items: center;
@@ -807,6 +820,7 @@ body.is-resizing {
 }
 
 .editor-toolbar__save:hover,
+.editor-toolbar__save-all:hover,
 .editor-toolbar__restore:hover {
   border-color: var(--toolbar-button-border-hover);
   background: var(--toolbar-button-bg-hover);
@@ -825,12 +839,14 @@ body.is-resizing {
 }
 
 .editor-toolbar__save:disabled,
+.editor-toolbar__save-all:disabled,
 .editor-toolbar__restore:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
 .editor-toolbar__save:disabled:hover,
+.editor-toolbar__save-all:disabled:hover,
 .editor-toolbar__restore:disabled:hover {
   border-color: var(--toolbar-button-border);
   background: var(--toolbar-button-bg);

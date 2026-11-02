@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { dropEditorBuffers } from "../editor-buffers";
+import { useDirtyEditorPaths } from "../hooks/use-editor-buffers";
 import FileEntry from "../interface/FileEntry";
 import { useTabs } from "../tabs";
 import ContextMenu, {
@@ -63,6 +64,7 @@ const Sidebar = () => {
   const { entries, createItem, deleteItem, moveItem, copyItem } =
     useFileEntries();
   const { openTab, currentFile, movePath } = useTabs();
+  const dirtyPaths = useDirtyEditorPaths();
   const { menu, openAt, close } = useContextMenu();
   const navigate = useNavigate();
   const [createModal, setCreateModal] = useState<CreateItemModalState | null>(
@@ -471,6 +473,7 @@ const Sidebar = () => {
         currentFile={currentFile}
         selectedPaths={selectedPaths}
         cutPaths={cutPaths}
+        dirtyPaths={dirtyPaths}
         onSelectionChange={setSelectedPaths}
         onOpenEntry={openEntry}
         onMoveEntries={(sourcePaths, targetDir) => {

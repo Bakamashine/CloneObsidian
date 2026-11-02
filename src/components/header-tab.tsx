@@ -5,6 +5,7 @@ export type HeaderTabProps = {
   tab: Tab;
   active?: boolean;
   closable?: boolean;
+  dirty?: boolean;
   onSelect?: () => void;
   onClose?: () => void;
 };
@@ -13,6 +14,7 @@ const HeaderTab = ({
   tab,
   active = false,
   closable = true,
+  dirty = false,
   onSelect,
   onClose,
 }: HeaderTabProps) => (
@@ -24,6 +26,7 @@ const HeaderTab = ({
       <FileIcon size={14} />
     </span>
     <span className="header__tab-title">{tab.name}</span>
+    {dirty && <span className="header__tab-dirty">*</span>}
     {closable && (
       <button
         className="header__tab-close"

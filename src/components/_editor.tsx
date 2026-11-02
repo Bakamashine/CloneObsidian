@@ -2,9 +2,11 @@ import { Editor, type OnMount } from "@monaco-editor/react";
 import { useCallback, useEffect, useState } from "react";
 import {
   deleteEditorBuffer,
+  getDirtyEditorPaths,
   getEditorBuffer,
   setEditorBuffer,
 } from "../editor-buffers";
+import { useDirtyEditorPaths } from "../hooks/use-editor-buffers";
 import { useTheme } from "../theme";
 import { useTabs } from "../tabs";
 import { SaveIcon, RestoreIcon } from "./icons";
@@ -22,6 +24,7 @@ const EDITOR_OPTIONS = {
 const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
   const { theme } = useTheme();
   const { viewMode, setViewMode } = useTabs();
+  const dirtyPaths = useDirtyEditorPaths();
   const cached = getEditorBuffer(fpfile);
   const [text, setText] = useState(cached?.text ?? "");
   const [savedText, setSavedText] = useState(cached?.savedText ?? "");
@@ -46,6 +49,32 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
       console.error("Failed to save file", error);
     }
   }, [fpfile, isDirty, text]);
+
+  const saveAll = useCallback(async () => {
+    const jobs = getDirtyEditorPaths()
+      .filter((path) => path !== fpfile)
+      .map(async (path) => {
+        const buffer = getEditorBuffer(path);
+        if (!buffer) return;
+
+        try {
+          await window.userFiles.saveText(path, buffer.text);
+
+          const latest = getEditorBuffer(path);
+          if (latest?.text === buffer.text) {
+            deleteEditorBuffer(path);
+          } else if (latest) {
+            setEditorBuffer(path, { ...latest, savedText: buffer.text });
+          }
+        } catch (error) {
+          console.error(`Failed to save ${path}`, error);
+        }
+      });
+
+    if (isDirty) jobs.push(save());
+
+    await Promise.all(jobs);
+  }, [fpfile, isDirty, save]);
 
   const restore = useCallback(() => {
     setText(savedText);
@@ -129,6 +158,18 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
           >
             <SaveIcon size={14} />
             Save
+          </button>
+
+          <button
+            type="button"
+            className="editor-toolbar__button editor-toolbar__save-all"
+            title="Save all files"
+            aria-label="Save all"
+            disabled={dirtyPaths.size === 0}
+            onClick={() => void saveAll()}
+          >
+            <SaveIcon size={14} />
+            Save All
           </button>
 
           <button
