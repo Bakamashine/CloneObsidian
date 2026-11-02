@@ -5,6 +5,9 @@ export type CreateItemKind = "file" | "folder";
 export type CreateItemModalState = {
   kind: CreateItemKind;
   parentPath?: string;
+  mode?: "create" | "rename";
+  initialValue?: string;
+  targetPath?: string;
 };
 
 type CreateItemModalProps = {
@@ -20,7 +23,7 @@ const CreateItemModal = ({ state, onCreate, onClose }: CreateItemModalProps) => 
 
   useEffect(() => {
     if (!state) return;
-    setValue("");
+    setValue(state.initialValue ?? "");
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
 
     const handlePointerDown = (event: MouseEvent) => {
@@ -41,7 +44,14 @@ const CreateItemModal = ({ state, onCreate, onClose }: CreateItemModalProps) => 
 
   if (!state) return null;
 
-  const title = state.kind === "file" ? "New file" : "New folder";
+  const renaming = state.mode === "rename";
+  const title = renaming
+    ? state.kind === "file"
+      ? "Rename file"
+      : "Rename folder"
+    : state.kind === "file"
+      ? "New file"
+      : "New folder";
   const trimmed = value.trim();
 
   const submit = () => {
@@ -74,7 +84,7 @@ const CreateItemModal = ({ state, onCreate, onClose }: CreateItemModalProps) => 
               if (event.key === "Enter") submit();
             }}
           />
-          {state.parentPath && (
+          {state.parentPath && !renaming && (
             <div className="modal__path">in {state.parentPath}</div>
           )}
         </div>
@@ -88,7 +98,7 @@ const CreateItemModal = ({ state, onCreate, onClose }: CreateItemModalProps) => 
             disabled={!trimmed}
             onClick={submit}
           >
-            Create
+            {renaming ? "Rename" : "Create"}
           </button>
         </div>
       </div>

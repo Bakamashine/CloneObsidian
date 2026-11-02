@@ -75,7 +75,7 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+      if ((event.ctrlKey || event.metaKey) && (event.key.toLowerCase() === "s" || event.key.toLowerCase() == "ы")) {
         event.preventDefault();
         void save();
       }

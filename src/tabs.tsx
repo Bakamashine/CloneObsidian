@@ -25,6 +25,7 @@ type TabsContextValue = TabsState & {
   openTab: (tab: Tab) => void;
   closeTab: (path: string) => void;
   closeAllTabs: () => void;
+  movePath: (from: string, to: string) => void;
   setCurrentFile: (path: string | null) => void;
   setViewMode: (mode: ViewMode) => void;
   toggleViewMode: () => void;
@@ -80,6 +81,21 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
     setState((prev) => ({ ...prev, tabs: [], currentFile: null }));
   }, []);
 
+  const movePath = useCallback((from: string, to: string) => {
+    const rewrite = (path: string) =>
+      path === from
+        ? to
+        : path.startsWith(`${from}/`)
+          ? `${to}${path.slice(from.length)}`
+          : path;
+
+    setState((prev) => ({
+      ...prev,
+      tabs: prev.tabs.map((tab) => ({ ...tab, path: rewrite(tab.path) })),
+      currentFile: prev.currentFile ? rewrite(prev.currentFile) : null,
+    }));
+  }, []);
+
   const setCurrentFile = useCallback((path: string | null) => {
     setState((prev) => ({ ...prev, currentFile: path }));
   }, []);
@@ -108,6 +124,7 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
       openTab,
       closeTab,
       closeAllTabs,
+      movePath,
       setCurrentFile,
       setViewMode,
       toggleViewMode,
@@ -117,6 +134,7 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
       openTab,
       closeTab,
       closeAllTabs,
+      movePath,
       setCurrentFile,
       setViewMode,
       toggleViewMode,

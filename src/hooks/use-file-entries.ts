@@ -34,5 +34,15 @@ export const useFileEntries = () => {
     [],
   );
 
-  return { entries, createItem, deleteItem };
+  const moveItem = useCallback(
+    async (from: string, to: string) => {
+      if (from === to) return;
+      await window.userFiles.move(from, to);
+      const files = await window.userFiles.getFiles();
+      setEntries(files);
+    },
+    [],
+  );
+
+  return { entries, createItem, deleteItem, moveItem };
 };

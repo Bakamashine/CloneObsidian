@@ -11,7 +11,7 @@ const Layout = () => {
       if (
         (event.ctrlKey || event.metaKey) &&
         event.shiftKey &&
-        event.key.toLowerCase() === 'f'
+        event.key.toLowerCase() === 'f' 
       ) {
         event.preventDefault();
         navigate('/search');

@@ -14,41 +14,61 @@ export function __UserFilesFunc() {
     return resolved;
   };
 
+  const allowedExt = new Set([".md"]);
   const getFiles = async (): Promise<FileEntry[]> => {
     const walk = async (
       dir: string,
-      depth: number,
-      rel: string,
+      rel = "",
+      depth = 0,
     ): Promise<FileEntry[]> => {
       const dirents = await fs.promises.readdir(dir, { withFileTypes: true });
-      const allowedExt = [".md"];
-      const entries: FileEntry[] = [];
+
+      const dirs: FileEntry[] = [];
+      const files: FileEntry[] = [];
+
       for (const dirent of dirents) {
+        if (dirent.name.startsWith(".")) continue;
+
         const entryPath = rel ? `${rel}/${dirent.name}` : dirent.name;
-        if (
-          allowedExt.includes(path.extname(entryPath)) ||
-          !path.extname(entryPath)
-        ) {
-          if (dirent.name[0] == ".") continue;
-          entries.push({
+
+        if (dirent.isDirectory()) {
+          dirs.push({
+            kind: "folder",
             name: dirent.name,
-            kind: dirent.isDirectory()
-              ? ("folder" as const)
-              : ("file" as const),
+            path: entryPath,
+            depth,
+          });
+        } else if (
+          dirent.isFile() &&
+          allowedExt.has(path.extname(dirent.name).toLowerCase())
+        ) {
+          files.push({
+            kind: "file",
+            name: dirent.name,
             path: entryPath,
             depth,
           });
         }
-
-        if (dirent.isDirectory()) {
-          entries.push(
-            ...(await walk(path.join(dir, dirent.name), depth + 1, entryPath)),
-          );
-        }
       }
-      return entries;
+
+      dirs.sort((a, b) => a.name.localeCompare(b.name));
+      files.sort((a, b) => a.name.localeCompare(b.name));
+
+      const result: FileEntry[] = [];
+      for (const directory of dirs) {
+        result.push(directory);
+        result.push(
+          ...(await walk(
+            path.join(dir, directory.name),
+            directory.path,
+            depth + 1,
+          )),
+        );
+      }
+      result.push(...files);
+      return result;
     };
-    return walk(userFiles, 0, "");
+    return await walk(userFiles);
   };
   const createDir = async (
     _: Electron.IpcMainInvokeEvent,
@@ -79,6 +99,54 @@ export function __UserFilesFunc() {
         recursive: true,
         force: true,
       });
+  };
+  const move = async (
+    _: Electron.IpcMainInvokeEvent,
+    from: string,
+    to: string,
+  ) => {
+    if (!from || !to) return;
+
+    const source = resolveInUserFiles(from);
+    const target = resolveInUserFiles(to);
+
+    if (source === target) return;
+
+    const stat = await fs.promises.stat(source);
+    if (stat.isDirectory()) {
+      if (target === source || target.startsWith(source + path.sep))
+        throw new Error("Cannot move a folder into itself");
+    }
+
+    if (fs.existsSync(target)) throw new Error("Target already exists");
+
+    await fs.promises.rename(source, target);
+  };
+  const copy = async (
+    _: Electron.IpcMainInvokeEvent,
+    from: string,
+    to: string,
+  ) => {
+    if (!from || !to) return;
+
+    const source = resolveInUserFiles(from);
+    const target = resolveInUserFiles(to);
+
+    if (source === target) return;
+
+    const stat = await fs.promises.stat(source);
+    if (stat.isDirectory()) {
+      if (target === source || target.startsWith(source + path.sep))
+        throw new Error("Cannot copy a folder into itself");
+    }
+
+    if (fs.existsSync(target)) throw new Error("Target already exists");
+
+    await fs.promises.cp(source, target, {
+      recursive: true,
+      errorOnExist: true,
+      force: false,
+    });
   };
   const getText = async (_: Electron.IpcMainInvokeEvent, ffname: string) => {
     if (ffname)
@@ -168,6 +236,8 @@ export function __UserFilesFunc() {
     createFile,
     deleteFile,
     deleteDir,
+    move,
+    copy,
     getText,
     saveText,
     search,

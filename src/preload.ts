@@ -18,6 +18,10 @@ contextBridge.exposeInMainWorld("userFiles", {
     ipcRenderer.invoke(_userFiles.deleteDir, dir_name),
   deleteFile: (file_name: string) =>
     ipcRenderer.invoke(_userFiles.deleteFile, file_name),
+  move: (from: string, to: string) =>
+    ipcRenderer.invoke(_userFiles.move, from, to),
+  copy: (from: string, to: string) =>
+    ipcRenderer.invoke(_userFiles.copy, from, to),
   getText: (ffname: string) => ipcRenderer.invoke(_userFiles.getText, ffname),
   saveText: (ffname: string, text: string) =>
     ipcRenderer.invoke(_userFiles.saveText, ffname, text),

@@ -12,6 +12,8 @@ interface UserFilesApi {
   createFile(file_name: string): Promise<void>;
   deleteFile(file_name: string): Promise<void>;
   deleteDirectory(directory_name: string): Promise<void>;
+  move(from: string, to: string): Promise<void>;
+  copy(from: string, to: string): Promise<void>;
   getText(fpfile: string): Promise<string>;
   saveText(fpfile: string, text: string): Promise<void>;
   search(query: string): Promise<import('./interface/SearchResult').default>;

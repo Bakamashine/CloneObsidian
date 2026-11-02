@@ -31,6 +31,8 @@ export const registerIpcHandlers = (
   ipcMain.handle(_userFiles.createFile, uf_func.createFile);
   ipcMain.handle(_userFiles.deleteFile, uf_func.deleteFile);
   ipcMain.handle(_userFiles.deleteDir, uf_func.deleteDir);
+  ipcMain.handle(_userFiles.move, uf_func.move);
+  ipcMain.handle(_userFiles.copy, uf_func.copy);
   ipcMain.handle(_userFiles.getText, uf_func.getText);
   ipcMain.handle(_userFiles.saveText, uf_func.saveText);
   ipcMain.handle(_userFiles.search, uf_func.search);

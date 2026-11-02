@@ -22,13 +22,17 @@
   --bg-secondary: #161616;
   --bg-header: #1b1b1b;
   --bg-hover: rgba(255, 255, 255, 0.05);
-  --bg-active: rgba(139, 108, 239, 0.15);
+  --bg-active: rgba(255, 255, 255, 0.15);
   --bg-tab: rgba(255, 255, 255, 0.04);
+  --selection-bg: rgba(255, 255, 255, 0.1);
+  --selection-border: rgba(255, 255, 255, 0.9);
   --border: rgba(255, 255, 255, 0.08);
   --text: #dcddde;
   --text-muted: #8a8a8a;
   --text-active: #ffffff;
-  --accent: #8b6cef;
+  --accent: #ffffff;
+  --accent-hover: #d4d4d4;
+  --accent-contrast: #000000;
   --success: #4caf50;
   --danger: #e81123;
   --danger-hover: #e81123;
@@ -45,10 +49,10 @@
   --toolbar-button-border-hover: rgba(255, 255, 255, 0.16);
   --toolbar-button-text: #c8c9cb;
   --toolbar-button-text-hover: #ffffff;
-  --toolbar-save-dirty-bg: rgba(139, 108, 239, 0.2);
-  --toolbar-save-dirty-bg-hover: rgba(139, 108, 239, 0.3);
-  --toolbar-save-dirty-border: rgba(139, 108, 239, 0.5);
-  --toolbar-save-dirty-text: #c9b8ff;
+  --toolbar-save-dirty-bg: rgba(255, 255, 255, 0.12);
+  --toolbar-save-dirty-bg-hover: rgba(255, 255, 255, 0.18);
+  --toolbar-save-dirty-border: rgba(255, 255, 255, 0.35);
+  --toolbar-save-dirty-text: #ffffff;
   --ribbon-width: 40px;
   --sidebar-width: 260px;
   --header-height: 40px;
@@ -60,13 +64,17 @@
   --bg-secondary: #f4f4f5;
   --bg-header: #fafafa;
   --bg-hover: rgba(0, 0, 0, 0.05);
-  --bg-active: rgba(139, 108, 239, 0.14);
+  --bg-active: rgba(0, 0, 0, 0.12);
   --bg-tab: rgba(0, 0, 0, 0.04);
+  --selection-bg: rgba(0, 0, 0, 0.08);
+  --selection-border: #000000;
   --border: rgba(0, 0, 0, 0.1);
   --text: #202020;
   --text-muted: #6b6b6b;
-  --text-active: #4c1d95;
-  --accent: #7a5af8;
+  --text-active: #000000;
+  --accent: #000000;
+  --accent-hover: #1f1f1f;
+  --accent-contrast: #ffffff;
   --success: #2e7d32;
   --danger: #c62828;
   --danger-hover: #c62828;
@@ -80,10 +88,10 @@
   --toolbar-button-border-hover: rgba(0, 0, 0, 0.2);
   --toolbar-button-text: #4a4a4a;
   --toolbar-button-text-hover: #161616;
-  --toolbar-save-dirty-bg: rgba(122, 90, 248, 0.12);
-  --toolbar-save-dirty-bg-hover: rgba(122, 90, 248, 0.2);
-  --toolbar-save-dirty-border: rgba(122, 90, 248, 0.45);
-  --toolbar-save-dirty-text: #5b21b6;
+  --toolbar-save-dirty-bg: rgba(0, 0, 0, 0.08);
+  --toolbar-save-dirty-bg-hover: rgba(0, 0, 0, 0.14);
+  --toolbar-save-dirty-border: rgba(0, 0, 0, 0.3);
+  --toolbar-save-dirty-text: #000000;
   color-scheme: light;
 }
 
@@ -258,8 +266,23 @@ svg {
 }
 
 .file-item--active {
-  background: var(--bg-active);
-  color: var(--text-active);
+  background: var(--selection-bg);
+  color: var(--text);
+}
+
+.file-item--selected {
+  background: var(--selection-bg);
+  box-shadow: inset 2px 0 0 var(--selection-border);
+}
+
+.file-item--cut {
+  opacity: 0.45;
+}
+
+.file-item--drop-target {
+  background: var(--selection-bg);
+  outline: 1px dashed var(--selection-border);
+  outline-offset: -1px;
 }
 
 .file-item--depth-1 {
@@ -291,7 +314,7 @@ svg {
 }
 
 .file-item--active .file-item__icon {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .file-item__name {
@@ -559,12 +582,11 @@ svg {
 
 .modal__button--primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .modal__button--primary:hover {
-  background: var(--accent);
-  filter: brightness(1.1);
+  background: var(--accent-hover);
 }
 
 /* Editor */
@@ -599,6 +621,7 @@ svg {
   padding: 0 12px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-primary);
+  user-select: none;
 }
 
 .editor-toolbar__view {
@@ -863,7 +886,7 @@ svg {
   padding: 0 1px;
   border-radius: 2px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 /* Markdown viewer */
