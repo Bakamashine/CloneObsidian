@@ -1,5 +1,10 @@
 import { Editor, type OnMount } from "@monaco-editor/react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  deleteEditorBuffer,
+  getEditorBuffer,
+  setEditorBuffer,
+} from "../editor-buffers";
 import { useTheme } from "../theme";
 import { useTabs } from "../tabs";
 import { SaveIcon, RestoreIcon } from "./icons";
@@ -17,9 +22,10 @@ const EDITOR_OPTIONS = {
 const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
   const { theme } = useTheme();
   const { viewMode, setViewMode } = useTabs();
-  const [text, setText] = useState("");
-  const [savedText, setSavedText] = useState("");
-  const [loading, setLoading] = useState(true);
+  const cached = getEditorBuffer(fpfile);
+  const [text, setText] = useState(cached?.text ?? "");
+  const [savedText, setSavedText] = useState(cached?.savedText ?? "");
+  const [loading, setLoading] = useState(!cached);
 
   const isDirty = text !== savedText;
 
@@ -29,6 +35,13 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
     try {
       await window.userFiles.saveText(fpfile, text);
       setSavedText(text);
+
+      const buffer = getEditorBuffer(fpfile);
+      if (buffer?.text === text) {
+        deleteEditorBuffer(fpfile);
+      } else if (buffer) {
+        setEditorBuffer(fpfile, { ...buffer, savedText: text });
+      }
     } catch (error) {
       console.error("Failed to save file", error);
     }
@@ -36,7 +49,8 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
 
   const restore = useCallback(() => {
     setText(savedText);
-  }, [savedText]);
+    deleteEditorBuffer(fpfile);
+  }, [fpfile, savedText]);
 
   const handleEditorMount = useCallback<OnMount>(
     (editor) => {
@@ -49,6 +63,14 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
   );
 
   useEffect(() => {
+    const buffer = getEditorBuffer(fpfile);
+    if (buffer) {
+      setText(buffer.text);
+      setSavedText(buffer.savedText);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     setLoading(true);
@@ -157,7 +179,15 @@ const _Editor = ({ fpfile, initialLine }: _EditorProps) => {
             defaultLanguage="markdown"
             options={EDITOR_OPTIONS}
             value={text}
-            onChange={(value) => setText(value ?? "")}
+            onChange={(value) => {
+              const nextText = value ?? "";
+              setText(nextText);
+              if (nextText === savedText) {
+                deleteEditorBuffer(fpfile);
+              } else {
+                setEditorBuffer(fpfile, { text: nextText, savedText });
+              }
+            }}
             onMount={handleEditorMount}
             height="100%"
           />

@@ -9,6 +9,7 @@ import {
   type PointerEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import { dropEditorBuffers } from "../editor-buffers";
 import FileEntry from "../interface/FileEntry";
 import { useTabs } from "../tabs";
 import ContextMenu, {
@@ -234,15 +235,19 @@ const Sidebar = () => {
         .map((path) => sourceLookup.get(path))
         .filter((entry): entry is FileEntry => !!entry);
 
+      const deleted: string[] = [];
+
       for (const source of sources) {
         try {
           await deleteItem(source.kind, source.path);
+          deleted.push(source.path);
         } catch (error) {
           console.error("Failed to delete entry", error);
         }
       }
 
-      const deleted = sources.map((source) => source.path);
+      deleted.forEach(dropEditorBuffers);
+
       const isDeleted = (path: string) =>
         deleted.some(
           (parent) => path === parent || path.startsWith(`${parent}/`),
@@ -451,6 +456,7 @@ const Sidebar = () => {
       ? joinPath(createModal.parentPath, trimmed)
       : trimmed;
     await createItem(createModal.kind, target);
+    dropEditorBuffers(target);
     setSelectedPaths(new Set([target]));
   };
 

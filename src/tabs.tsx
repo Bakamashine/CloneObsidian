@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { moveEditorBuffers } from "./editor-buffers";
 
 export type Tab = {
   name: string;
@@ -88,6 +89,8 @@ export const TabsProvider = ({ children }: { children: ReactNode }) => {
         : path.startsWith(`${from}/`)
           ? `${to}${path.slice(from.length)}`
           : path;
+
+    moveEditorBuffers(from, to);
 
     setState((prev) => ({
       ...prev,
