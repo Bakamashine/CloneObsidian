@@ -1,98 +1,75 @@
-import { useState, type DragEvent, type MouseEvent } from "react";
+import { useMemo, useState, type CSSProperties, type MouseEvent } from "react";
+import {
+  ControlledTreeEnvironment,
+  Tree,
+  type DraggingPosition,
+  type TreeItem,
+  type TreeItemIndex,
+  type TreeViewState,
+} from "react-complex-tree";
+import "react-complex-tree/lib/style-modern.css";
 import FileEntry from "../interface/FileEntry";
 import { ChevronRightIcon, FileIcon, FolderIcon } from "./icons";
 
-type FileItemProps = {
-  entry: FileEntry;
-  active: boolean;
-  selected: boolean;
-  cut: boolean;
-  collapsed?: boolean;
-  dropTarget?: boolean;
-  onClick?: () => void;
-  onContextMenu: (event: MouseEvent) => void;
-  onDragStart: (event: DragEvent) => void;
-  onDragOver: (event: DragEvent) => void;
-  onDragLeave: (event: DragEvent) => void;
-  onDrop: (event: DragEvent) => void;
+const TREE_ID = "vault";
+const ROOT_ID = "root";
+const EMPTY_SET = new Set<string>();
+
+type VaultTreeItem = TreeItem<FileEntry>;
+
+const dirname = (path: string) => {
+  const index = path.lastIndexOf("/");
+  return index === -1 ? "" : path.slice(0, index);
 };
 
-const FileItem = ({
-  entry,
-  active,
-  selected,
-  cut,
-  collapsed,
-  dropTarget,
-  onClick,
-  onContextMenu,
-  onDragStart,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-}: FileItemProps) => (
-  <div
-    draggable
-    onClick={onClick}
-    onContextMenu={onContextMenu}
-    onDragStart={onDragStart}
-    onDragOver={onDragOver}
-    onDragLeave={onDragLeave}
-    onDrop={onDrop}
-    className={[
-      "file-item",
-      entry.depth ? `file-item--depth-${entry.depth}` : "",
-      active ? "file-item--active" : "",
-      selected ? "file-item--selected" : "",
-      cut ? "file-item--cut" : "",
-      collapsed ? "file-item--collapsed" : "",
-      dropTarget ? "file-item--drop-target" : "",
-    ]
-      .filter(Boolean)
-      .join(" ")}
-  >
-    {entry.kind === "folder" && (
-      <ChevronRightIcon size={12} className="file-item__chevron" />
-    )}
-    <span className="file-item__icon">
-      {entry.kind === "folder" ? (
-        <FolderIcon size={14} />
-      ) : (
-        <FileIcon size={14} />
-      )}
-    </span>
-    <span className="file-item__name">{entry.name}</span>
-  </div>
-);
+const buildItems = (entries: FileEntry[]) => {
+  const items: Record<TreeItemIndex, VaultTreeItem> = {
+    [ROOT_ID]: {
+      index: ROOT_ID,
+      isFolder: true,
+      children: [],
+      canMove: false,
+      canRename: false,
+      data: { name: "", kind: "folder", path: "" },
+    },
+  };
 
-const filterVisible = (entries: FileEntry[], expanded: Set<string>) => {
-  const result: FileEntry[] = [];
-  const ancestors: string[] = [];
+  const parents: string[] = [ROOT_ID];
 
   for (const entry of entries) {
     const depth = entry.depth ?? 0;
+    if (depth + 1 < parents.length) parents.length = depth + 1;
 
-    ancestors.length = depth;
+    const parent = parents[depth] ?? ROOT_ID;
+    const item: VaultTreeItem = {
+      index: entry.path,
+      isFolder: entry.kind === "folder",
+      canMove: true,
+      canRename: true,
+      data: entry,
+    };
 
-    if (depth > 0 && !expanded.has(ancestors[depth - 1])) {
-      continue;
+    if (entry.kind === "folder") {
+      item.children = [];
+      parents[depth + 1] = entry.path;
     }
 
-    result.push(entry);
-    ancestors[depth] = entry.path;
+    items[entry.path] = item;
+    items[parent].children = [...(items[parent].children ?? []), entry.path];
   }
-  return result;
+
+  return items;
 };
 
 type ExplorerProps = {
   entries?: FileEntry[];
   currentFile: string | null;
-  selectedPath: string | null;
-  cutPath: string | null;
-  onNewFile: () => void;
-  onSelectEntry: (entry: FileEntry) => void;
-  onClearSelection: () => void;
-  onMoveEntry: (sourcePath: string, targetDir: string) => void;
+  selectedPaths: Set<string>;
+  cutPaths?: Set<string>;
+  onSelectionChange: (paths: Set<string>) => void;
+  onOpenEntry: (entry: FileEntry) => void;
+  onMoveEntries: (sourcePaths: string[], targetDir: string) => void;
+  onRenameEntry: (entry: FileEntry, name: string) => void;
   onListContextMenu: (event: MouseEvent) => void;
   onEntryContextMenu: (event: MouseEvent, entry: FileEntry) => void;
 };
@@ -100,74 +77,42 @@ type ExplorerProps = {
 const Explorer = ({
   entries,
   currentFile,
-  selectedPath,
-  cutPath,
-  onSelectEntry,
-  onClearSelection,
-  onMoveEntry,
+  selectedPaths,
+  cutPaths = EMPTY_SET,
+  onSelectionChange,
+  onOpenEntry,
+  onMoveEntries,
+  onRenameEntry,
   onListContextMenu,
   onEntryContextMenu,
 }: ExplorerProps) => {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([]);
+  const [focusedItem, setFocusedItem] = useState<TreeItemIndex | undefined>();
 
-  const toggleFolder = (path: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(path)) next.delete(path);
-      else next.add(path);
-      return next;
-    });
+  const items = useMemo(() => buildItems(entries ?? []), [entries]);
+
+  const selectedItems = useMemo(() => Array.from(selectedPaths), [selectedPaths]);
+  const expanded = useMemo(
+    () => expandedItems.filter((index) => items[index]?.isFolder),
+    [expandedItems, items],
+  );
+  const focused = focusedItem && items[focusedItem] ? focusedItem : undefined;
+
+  const viewState: TreeViewState = {
+    [TREE_ID]: { selectedItems, expandedItems: expanded, focusedItem: focused },
   };
 
-  const visible = entries ? filterVisible(entries, expanded) : entries;
-
-  const handleDragStart = (event: DragEvent, entry: FileEntry) => {
-    event.dataTransfer.setData("application/x-vault-entry", entry.path);
-    event.dataTransfer.setData("text/plain", entry.path);
-    event.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (event: DragEvent, entry: FileEntry) => {
-    event.stopPropagation();
-    if (entry.kind !== "folder") {
-      setDropTarget(null);
-      return;
+  const targetDirForDrop = (target: DraggingPosition) => {
+    if (target.targetType === "item") {
+      const item = items[target.targetItem];
+      if (!item) return "";
+      return item.isFolder ? item.data.path : dirname(item.data.path);
     }
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    setDropTarget(entry.path);
-  };
-
-  const handleDragLeave = (event: DragEvent, entry: FileEntry) => {
-    event.stopPropagation();
-    setDropTarget((current) => (current === entry.path ? null : current));
-  };
-
-  const readSource = (event: DragEvent) =>
-    event.dataTransfer.getData("application/x-vault-entry") ||
-    event.dataTransfer.getData("text/plain");
-
-  const handleDrop = (event: DragEvent, entry: FileEntry) => {
-    if (entry.kind !== "folder") return;
-    event.preventDefault();
-    event.stopPropagation();
-    setDropTarget(null);
-    const source = readSource(event);
-    if (source) onMoveEntry(source, entry.path);
-  };
-
-  const handleListDragOver = (event: DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    setDropTarget("");
-  };
-
-  const handleListDrop = (event: DragEvent) => {
-    event.preventDefault();
-    setDropTarget(null);
-    const source = readSource(event);
-    if (source) onMoveEntry(source, "");
+    if (target.targetType === "between-items") {
+      const parent = items[target.parentItem];
+      return parent && parent.index !== ROOT_ID ? parent.data.path : "";
+    }
+    return "";
   };
 
   return (
@@ -178,34 +123,136 @@ const Explorer = ({
 
       <div
         className="explorer__list"
-        onContextMenu={onListContextMenu}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) onClearSelection();
+        onContextMenu={(event) => {
+          if (event.target === event.currentTarget) {
+            event.preventDefault();
+            onListContextMenu(event);
+          }
         }}
-        onDragOver={handleListDragOver}
-        onDrop={handleListDrop}
-        onDragLeave={() => setDropTarget((current) => (current ? null : current))}
       >
-        {visible?.map((entry) => (
-          <FileItem
-            key={entry.path}
-            entry={entry}
-            active={entry.path === currentFile}
-            selected={entry.path === selectedPath}
-            cut={entry.path === cutPath}
-            collapsed={entry.kind === "folder" && !expanded.has(entry.path)}
-            dropTarget={entry.kind === "folder" && dropTarget === entry.path}
-            onClick={() => {
-              onSelectEntry(entry);
-              if (entry.kind === "folder") toggleFolder(entry.path);
+        <div className="explorer-tree">
+          <ControlledTreeEnvironment<FileEntry>
+            items={items}
+            viewState={viewState}
+            getItemTitle={(item) => item.data.name}
+            canDragAndDrop
+            canDropOnFolder
+            canDropOnNonFolder={false}
+            canReorderItems={false}
+            canRename
+            onSelectItems={(indexes) =>
+              onSelectionChange(new Set(indexes.map(String)))
+            }
+            onFocusItem={(item) => setFocusedItem(item.index)}
+            onExpandItem={(item) =>
+              setExpandedItems((prev) =>
+                prev.includes(item.index) ? prev : [...prev, item.index],
+              )
+            }
+            onCollapseItem={(item) =>
+              setExpandedItems((prev) =>
+                prev.filter((index) => index !== item.index),
+              )
+            }
+            onPrimaryAction={(item) => {
+              if (item.data.kind === "file") onOpenEntry(item.data);
             }}
-            onContextMenu={(event) => onEntryContextMenu(event, entry)}
-            onDragStart={(event) => handleDragStart(event, entry)}
-            onDragOver={(event) => handleDragOver(event, entry)}
-            onDragLeave={(event) => handleDragLeave(event, entry)}
-            onDrop={(event) => handleDrop(event, entry)}
-          />
-        ))}
+            onDrop={(dragged, target) => {
+              const sourcePaths = dragged
+                .map((item) => item.data.path)
+                .filter(Boolean);
+              if (sourcePaths.length) {
+                onMoveEntries(sourcePaths, targetDirForDrop(target));
+              }
+            }}
+            onRenameItem={(item, name) => onRenameEntry(item.data, name)}
+            renderItemArrow={({ item, context }) =>
+              item.isFolder ? (
+                <div
+                  {...context.arrowProps}
+                  className={[
+                    "rct-tree-item-arrow",
+                    "rct-tree-item-arrow-isFolder",
+                    "explorer-tree__arrow",
+                    context.isExpanded
+                      ? "rct-tree-item-arrow-expanded"
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <ChevronRightIcon size={12} className="file-item__chevron" />
+                </div>
+              ) : (
+                <span className="explorer-tree__arrow-spacer" />
+              )
+            }
+            renderItemTitle={({ title, item }) => {
+              const entry = item.data;
+              const isCut = cutPaths.has(entry.path);
+              const isCurrent = entry.path === currentFile;
+
+              return (
+                <span
+                  className={[
+                    "explorer-entry",
+                    isCut ? "explorer-entry--cut" : "",
+                    isCurrent ? "explorer-entry--active" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (!selectedPaths.has(entry.path)) {
+                      onSelectionChange(new Set([entry.path]));
+                    }
+                    onEntryContextMenu(event, entry);
+                  }}
+                >
+                  <span className="explorer-entry__icon">
+                    {entry.kind === "folder" ? (
+                      <FolderIcon size={14} />
+                    ) : (
+                      <FileIcon size={14} />
+                    )}
+                  </span>
+                  <span className="explorer-entry__name">{title}</span>
+                </span>
+              );
+            }}
+            renderTreeContainer={({ children, containerProps, info }) => (
+              <div
+                className={[
+                  "rct-tree-root",
+                  info.isFocused ? "rct-tree-root-focus" : "",
+                  info.isRenaming ? "rct-tree-root-renaming" : "",
+                  info.areItemsSelected ? "rct-tree-root-itemsselected" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={
+                  {
+                    "--rct-item-height": "26px",
+                  } as CSSProperties
+                }
+              >
+                <div
+                  {...containerProps}
+                  style={{ minHeight: 30, ...containerProps.style }}
+                >
+                  {children}
+                </div>
+              </div>
+            )}
+          >
+            <Tree
+              treeId={TREE_ID}
+              rootItem={ROOT_ID}
+              treeLabel="Vault files"
+            />
+          </ControlledTreeEnvironment>
+        </div>
       </div>
     </div>
   );

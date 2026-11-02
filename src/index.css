@@ -171,11 +171,45 @@ svg {
 /* Sidebar */
 
 .sidebar {
+  position: relative;
   display: flex;
   width: var(--sidebar-width);
   flex-shrink: 0;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
+}
+
+.sidebar__resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  z-index: 10;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sidebar__resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 1px;
+  bottom: 0;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.1s ease;
+}
+
+.sidebar__resizer:hover::after,
+.sidebar__resizer:active::after,
+body.is-resizing .sidebar__resizer::after {
+  background: var(--selection-border);
+}
+
+body.is-resizing {
+  cursor: col-resize;
+  user-select: none;
 }
 
 .ribbon {
@@ -315,6 +349,105 @@ svg {
 
 .file-item--active .file-item__icon {
   color: var(--text);
+}
+
+/* Explorer tree (react-complex-tree) */
+
+.explorer-tree {
+  --rct-color-tree-bg: transparent;
+  --rct-item-height: 26px;
+  --rct-item-padding: 8px;
+  --rct-bar-color: var(--selection-border);
+  --rct-color-focustree-item-selected-bg: var(--selection-bg);
+  --rct-color-focustree-item-selected-text: var(--text);
+  --rct-color-nonfocustree-item-selected-bg: var(--selection-bg);
+  --rct-color-nonfocustree-item-selected-text: var(--text);
+  --rct-color-focustree-item-hover-bg: var(--bg-hover);
+  --rct-color-focustree-item-hover-text: var(--text);
+  --rct-color-focustree-item-active-bg: var(--bg-hover);
+  --rct-color-focustree-item-active-text: var(--text);
+  --rct-color-focustree-item-draggingover-bg: var(--selection-bg);
+  --rct-color-focustree-item-draggingover-color: var(--text);
+  --rct-color-arrow: var(--text-muted);
+  --rct-color-search-highlight-bg: var(--bg-active);
+  --rct-color-drag-between-line-bg: var(--selection-border);
+  --rct-arrow-container-size: 14px;
+  --rct-arrow-size: 12px;
+  --rct-arrow-padding: 4px;
+}
+
+.explorer-tree .rct-tree-root {
+  padding: 0;
+  background: transparent;
+  font-family: var(--font-ui);
+}
+
+.explorer-tree .rct-tree-root-focus {
+  outline: none;
+}
+
+.explorer-tree .rct-tree-item-li {
+  font-size: 14px;
+}
+
+.explorer-tree .rct-tree-item-button {
+  height: 26px;
+  margin-left: 0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+.explorer-tree .rct-tree-item-button:focus-visible {
+  outline: 1px solid var(--selection-border);
+}
+
+.explorer-tree .rct-tree-item-arrow {
+  width: 14px;
+  height: 14px;
+  margin-right: 0;
+  color: var(--text-muted);
+}
+
+.explorer-tree .file-item__chevron {
+  margin-left: 0;
+  transform: none;
+}
+
+.explorer-tree .rct-tree-item-arrow-expanded .file-item__chevron {
+  transform: rotate(90deg);
+}
+
+.explorer-tree__arrow-spacer {
+  width: 14px;
+  flex-shrink: 0;
+}
+
+.explorer-tree .explorer-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.explorer-entry__icon {
+  display: flex;
+  color: var(--text-muted);
+}
+
+.explorer-entry--active .explorer-entry__icon {
+  color: var(--text);
+}
+
+.explorer-entry__name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.explorer-entry--cut {
+  opacity: 0.45;
 }
 
 .file-item__name {
